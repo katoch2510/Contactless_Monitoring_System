@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gate Terminal — SmartCampus</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+</head>
+<body>
+<div class="scanner-page">
+  <div style="width:100%;max-width:680px;margin-bottom:1rem;">
+    <a href="/admin/" style="color:#64748b;font-size:.875rem;display:inline-flex;align-items:center;gap:.375rem;transition:color .15s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#64748b'">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Back to Dashboard
+    </a>
+  </div>
+
+  <div class="scanner-card">
+    <div class="scanner-header">
+      <div class="scanner-pulse" id="scannerPulse">
+        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" stroke="#6366f1" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9H1v6h2M21 9h2v6h-2M9 3V1H15V3M9 21v2h6v-2M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <h2 style="color:#fff;font-size:1.75rem;margin-bottom:.375rem;">Gate Security Terminal</h2>
+      <p style="color:#64748b;">Select entry verification method</p>
+      <div class="scanner-tabs">
+        <button class="scanner-tab active" id="tabFace" onclick="setMode('face')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:.375rem;"><circle cx="12" cy="8" r="4"/><path d="M12 14c-5 0-8 2.5-8 4v1h16v-1c0-1.5-3-4-8-4z"/></svg>
+          Auto Face Scan
+        </button>
+        <button class="scanner-tab" id="tabManual" onclick="setMode('manual')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="display:inline;vertical-align:middle;margin-right:.375rem;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Manual Bypass
+        </button>
+      </div>
+    </div>
+
+    <div class="scanner-body">
+      <!-- Face Mode -->
+      <div id="faceMode">
+        <div id="faceModelsLoader" style="padding:4rem 0;display:flex;flex-direction:column;align-items:center;color:#64748b;gap:.75rem;">
+          <div class="spinner" style="border-top-color:#6366f1;"></div>
+          Loading AI Models...
+        </div>
+        <div id="faceScanUI" style="display:none;">
+          <div style="position:relative;background:#000;border-radius:.75rem;overflow:hidden;border:2px solid rgba(99,102,241,.3);">
+            <video id="scanWebcam" autoplay playsinline style="width:100%;display:block;min-height:280px;object-fit:cover;"></video>
+            <div id="freezeOverlay" style="position:absolute;inset:0;background:rgba(0,0,0,.7);flex-direction:column;align-items:center;justify-content:center;color:#fff;display:none;z-index:10;">
+              <div class="spinner"></div><p style="margin-top:1rem;font-weight:600;">Analyzing Biometrics...</p>
+            </div>
+            <div style="position:absolute;top:.75rem;left:.75rem;background:rgba(0,0,0,.5);color:#fff;font-size:.75rem;padding:.25rem .75rem;border-radius:9999px;display:flex;align-items:center;gap:.375rem;">
+              <div style="width:.5rem;height:.5rem;background:#10b981;border-radius:9999px;animation:pulsedot 1s infinite;"></div>
+              Target Ready
+            </div>
+          </div>
+          <button id="triggerScanBtn" onclick="triggerScan()" class="btn btn-primary w-full" style="margin-top:1rem;padding:.75rem;font-size:1.1rem;">📸 Capture & Scan Face</button>
+          <button onclick="setMode('manual')" style="display:block;margin:.75rem auto 0;background:none;border:none;color:#6366f1;font-size:.82rem;cursor:pointer;text-decoration:underline;">Camera failing? Use Manual Bypass.</button>
+        </div>
+      </div>
+
+      <!-- Manual Mode -->
+      <div id="manualMode" style="display:none;">
+        <div class="form-group" style="margin-bottom:1rem;">
+          <label style="color:#94a3b8;font-size:.85rem;font-weight:500;display:block;margin-bottom:.5rem;">Search Registered Students</label>
+          <div class="search-box">
+            <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="#64748b" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+            <input id="manualSearch" type="text" class="form-input" style="background:#0f172a;border-color:#334155;color:#fff;" placeholder="Search by Name or Student ID..." oninput="onSearch(this.value)" />
+          </div>
+        </div>
+        <div id="searchResults" style="background:#0f172a;border:1px solid #334155;border-radius:.75rem;overflow:hidden;display:none;"></div>
+        <p id="noResults" style="display:none;text-align:center;color:#475569;font-size:.875rem;margin-top:1rem;">No students found.</p>
+      </div>
+
+      <!-- Scan Result -->
+      <div id="scanResult" style="display:none;"></div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/api.js"></script>
+<script src="/static/js/auth.js"></script>
+<script src="/static/js/toast.js"></script>
+<script>
+requireAuth();
+let mode = 'face';
+let scanStream = null;
+let modelsLoaded = false;
+
+function playBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.setValueAtTime(800, ctx.currentTime);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.15);
+  } catch(e) {}
+}
+
+async function loadModels() {
+  try {
+    await Promise.all([
+      faceapi.nets.ssdMobilenetv1.loadFromUri('/static/models'),
+      faceapi.nets.faceLandmark68Net.loadFromUri('/static/models'),
+      faceapi.nets.faceRecognitionNet.loadFromUri('/static/models'),
+    ]);
+    modelsLoaded = true;
+    document.getElementById('faceModelsLoader').style.display = 'none';
+    document.getElementById('faceScanUI').style.display = 'block';
+    startFaceScan();
+  } catch(e) {
+    document.getElementById('faceModelsLoader').innerHTML = '<span style="color:#ef4444;">⚠ Failed to load AI models.</span>';
+  }
+}
+
+async function startFaceScan() {
+  if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); }
+  try {
+    scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+    document.getElementById('scanWebcam').srcObject = scanStream;
+    document.getElementById('scannerPulse').classList.add('active');
+  } catch(e) { showToast('Camera access required for face scanning', 'error'); return; }
+}
+
+async function triggerScan() {
+  const video = document.getElementById('scanWebcam');
+  const btn = document.getElementById('triggerScanBtn');
+  btn.disabled = true;
+
+  // Pause video state visually
+  video.pause();
+  document.getElementById('freezeOverlay').style.display = 'flex';
+
+  // Capture the current frame as an image
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth || 640;
+  canvas.height = video.videoHeight || 480;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+
+  // Wait for image to load using a proper Promise
+  const img = await new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.src = canvas.toDataURL('image/jpeg', 0.95);
+  });
+
+  // Small delay to show analyzing overlay
+  await new Promise(r => setTimeout(r, 1500));
+
+  try {
+    const det = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+    if (det) {
+      try {
+        const data = await api.post('/api/students/match', {
+          descriptor: Array.from(det.descriptor), gate_location: 'Main Gate Camera'
+        });
+        showResult(true, data.message);
+        playBeep();
+      } catch(e) {
+        showResult(false, e.message || 'Face not recognized. Access Denied.');
+        playBeep();
+      }
+    } else {
+      showResult(false, 'No face detected. Please look directly at the camera.');
+    }
+  } catch(e) {
+    showResult(false, 'Face detection error. Try again.');
+  }
+
+  // Resume camera
+  document.getElementById('freezeOverlay').style.display = 'none';
+  video.play();
+  btn.disabled = false;
+}
+
+function stopFaceScan() {
+  if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+  document.getElementById('scannerPulse').classList.remove('active');
+}
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('tabFace').classList.toggle('active', m === 'face');
+  document.getElementById('tabManual').classList.toggle('active', m === 'manual');
+  document.getElementById('faceMode').style.display = m === 'face' ? '' : 'none';
+  document.getElementById('manualMode').style.display = m === 'manual' ? '' : 'none';
+  if (m === 'face' && modelsLoaded) startFaceScan();
+  else stopFaceScan();
+}
+
+function showResult(success, message) {
+  const el = document.getElementById('scanResult');
+  el.style.display = '';
+  el.innerHTML = `<div class="scanner-result ${success ? 'success' : 'error'}">
+    <div>
+      <h3>${success ? '✓ Access Logged' : '✗ Access Denied'}</h3>
+      <p>${message}</p>
+    </div>
+  </div>`;
+}
+
+let searchTimeout;
+function onSearch(q) {
+  clearTimeout(searchTimeout);
+  if (q.trim().length < 3) {
+    document.getElementById('searchResults').style.display = 'none';
+    document.getElementById('noResults').style.display = 'none';
+    return;
+  }
+  searchTimeout = setTimeout(async () => {
+    const results = await api.get(`/api/students/search?q=${encodeURIComponent(q)}`);
+    const el = document.getElementById('searchResults');
+    if (results.length === 0) {
+      el.style.display = 'none';
+      document.getElementById('noResults').style.display = '';
+    } else {
+      document.getElementById('noResults').style.display = 'none';
+      el.style.display = '';
+      el.innerHTML = results.map(s => `
+        <div class="search-result-item">
+          <div>
+            <div style="font-weight:600;color:#fff;">${s.name}</div>
+            <div style="font-size:.75rem;color:#64748b;">${s.student_id} · ${s.email}</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="manualLog(${s.id})">Log Bypass</button>
+        </div>
+      `).join('');
+    }
+  }, 300);
+}
+
+async function manualLog(studentId) {
+  try {
+    const data = await api.post('/api/students/manual-log', { studentId, gate_location: 'Main Gate (Manual)' });
+    showResult(true, data.message);
+    playBeep();
+    document.getElementById('manualSearch').value = '';
+    document.getElementById('searchResults').style.display = 'none';
+  } catch(e) {
+    showResult(false, e.message || 'Manual Log Failed');
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadModels);
+window.addEventListener('beforeunload', stopFaceScan);
+
+// CSS keyframe for dot
+const style = document.createElement('style');
+style.textContent = '@keyframes pulsedot { 0%,100%{opacity:1} 50%{opacity:.3} }';
+document.head.appendChild(style);
+</script>
+</body>
+</html>

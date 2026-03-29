@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Visitor Registration — SmartCampus</title>
+  <meta name="description" content="Pre-register your visit to the campus for a secure contactless gate pass." />
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+</head>
+<body>
+
+<div class="vr-page" id="mainView">
+  <div class="vr-card">
+    <!-- Left: Form -->
+    <div>
+      <div class="mb-6">
+        <a href="/" style="font-size:.85rem;color:var(--text-muted);display:inline-flex;align-items:center;gap:.25rem;margin-bottom:1rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg> Home
+        </a>
+        <h2>Visitor Pre-Registration</h2>
+        <p style="color:var(--text-muted);margin-top:.375rem;">Request access to the campus securely.</p>
+      </div>
+
+      <div class="space-y-4" id="regForm">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <div class="form-input-icon">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input id="name" type="text" class="form-input" placeholder="John Doe" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <div class="form-input-icon">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 10.1 19.79 19.79 0 0 1 1.61 1.56 2 2 0 0 1 3.59 0h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 7.91a16 16 0 0 0 6.06 6.06l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 15.5z"/></svg>
+            <input id="phone" type="tel" class="form-input" placeholder="+91 99999 00000" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <div class="form-input-icon">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <input id="email" type="email" class="form-input" placeholder="john@example.com" required />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date & Time of Visit</label>
+          <input id="visit_date" type="datetime-local" class="form-input" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purpose of Visit</label>
+          <textarea id="purpose" class="form-input" rows="2" placeholder="Meeting, Event, Research, etc." required style="resize:none;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Webcam -->
+    <div style="display:flex;flex-direction:column;">
+      <h3 style="margin-bottom:.375rem;display:flex;align-items:center;gap:.5rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 7 16 12 23 17V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+        Facial Recognition Scan
+      </h3>
+      <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:1rem;">Capture your face for contactless campus entry.</p>
+
+      <div class="webcam-box" style="flex:1;min-height:260px;border-color:var(--border);" id="camBox">
+        <div id="camLoader" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--surface2);color:var(--text-muted);font-size:.85rem;gap:.75rem;">
+          <div class="spinner"></div>Loading AI Models...
+        </div>
+        <video id="webcam" autoplay playsinline style="width:100%;display:block;"></video>
+        <img id="capturedImg" style="width:100%;display:none;object-fit:cover;" alt="Captured" />
+        <div class="webcam-overlay" id="captureOverlay" style="display:none;">
+          <button class="btn btn-primary" id="captureBtn" onclick="captureFace()">Capture Face</button>
+        </div>
+        <div id="retakeBar" style="display:none;position:absolute;inset-x:0;bottom:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:1rem;display:flex;justify-content:space-between;align-items:center;">
+          <span style="color:#fff;font-size:.85rem;">✓ Face Enrolled</span>
+          <button onclick="resetCapture()" style="background:rgba(0,0,0,.4);border:none;color:#fff;padding:.25rem .75rem;border-radius:9999px;font-size:.75rem;cursor:pointer;">Retake</button>
+        </div>
+      </div>
+
+      <button id="submitBtn" class="btn btn-success w-full btn-lg" style="margin-top:1.25rem;" onclick="submitForm()" disabled>Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Success Screen -->
+<div id="successView" class="hidden" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--surface2);">
+  <div class="card text-center" style="max-width:420px;padding:3rem;border-top:5px solid var(--green);">
+    <svg xmlns="http://www.w3.org/2000/svg" width="72" height="72" fill="none" stroke="#10b981" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 1.5rem;display:block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <h2>Request Submitted!</h2>
+    <p style="color:var(--text-muted);margin-top:.75rem;margin-bottom:1.5rem;">Your visit request has been successfully registered. Your entry is now marked, and you can enter the campus via Face Entry.</p>
+    <button class="btn btn-primary" onclick="resetAll()">Submit Another Request</button>
+  </div>
+</div>
+
+<script src="/static/js/api.js"></script>
+<script src="/static/js/toast.js"></script>
+<script>
+let faceDescriptor = null;
+let capturedImage = null;
+let webcamStream = null;
+
+async function init() {
+  try {
+    await Promise.all([
+      faceapi.nets.ssdMobilenetv1.loadFromUri('/static/models'),
+      faceapi.nets.faceLandmark68Net.loadFromUri('/static/models'),
+      faceapi.nets.faceRecognitionNet.loadFromUri('/static/models'),
+    ]);
+    webcamStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+    document.getElementById('webcam').srcObject = webcamStream;
+    document.getElementById('camLoader').style.display = 'none';
+    document.getElementById('captureOverlay').style.display = 'flex';
+  } catch (e) {
+    document.getElementById('camLoader').innerHTML = '<span style="color:var(--red);">⚠ Failed to load camera/models. Please allow camera access and refresh.</span>';
+    console.error(e);
+  }
+}
+
+async function captureFace() {
+  const video = document.getElementById('webcam');
+  const btn = document.getElementById('captureBtn');
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  capturedImage = canvas.toDataURL('image/jpeg', 0.85);
+
+  const img = new Image();
+  img.src = capturedImage;
+  img.onload = async () => {
+    const det = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+    if (det) {
+      faceDescriptor = Array.from(det.descriptor);
+      document.getElementById('webcam').style.display = 'none';
+      document.getElementById('capturedImg').src = capturedImage;
+      document.getElementById('capturedImg').style.display = 'block';
+      document.getElementById('captureOverlay').style.display = 'none';
+      document.getElementById('retakeBar').style.display = 'flex';
+      document.getElementById('submitBtn').disabled = false;
+      showToast('Face captured successfully!', 'success');
+    } else {
+      showToast('No face detected. Please ensure your face is clearly visible.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Capture Face';
+    }
+  };
+}
+
+function resetCapture() {
+  faceDescriptor = null;
+  capturedImage = null;
+  document.getElementById('capturedImg').style.display = 'none';
+  document.getElementById('capturedImg').src = '';
+  document.getElementById('webcam').style.display = 'block';
+  document.getElementById('captureOverlay').style.display = 'flex';
+  document.getElementById('retakeBar').style.display = 'none';
+  document.getElementById('captureBtn').disabled = false;
+  document.getElementById('captureBtn').textContent = 'Capture Face';
+  document.getElementById('submitBtn').disabled = true;
+}
+
+async function submitForm() {
+  if (!faceDescriptor) return showToast('Please capture your face first.', 'warning');
+  const payload = {
+    name: document.getElementById('name').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    purpose: document.getElementById('purpose').value.trim(),
+    visit_date: document.getElementById('visit_date').value,
+    face_encoding: faceDescriptor,
+    photo_base64: capturedImage
+  };
+  if (!payload.name || !payload.phone || !payload.email || !payload.visit_date || !payload.purpose) {
+    return showToast('Please fill all fields.', 'warning');
+  }
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting...';
+  try {
+    await api.post('/api/visitors/register', payload);
+    document.getElementById('mainView').classList.add('hidden');
+    document.getElementById('successView').classList.remove('hidden');
+  } catch (err) {
+    showToast(err.message || 'Failed to submit request', 'error');
+    btn.disabled = false; btn.textContent = 'Submit Request';
+  }
+}
+
+function resetAll() {
+  document.getElementById('successView').classList.add('hidden');
+  document.getElementById('mainView').classList.remove('hidden');
+  resetCapture();
+  ['name','phone','email','visit_date','purpose'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('submitBtn').disabled = true;
+}
+
+window.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

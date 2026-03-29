@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registered Profiles — SmartCampus</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+<div class="admin-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="icon-wrap"><svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <span>SmartCampus.</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/admin/">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
+      </a>
+      <a href="/admin/logs">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Entry Logs
+      </a>
+      <a href="/admin/register-student">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>Register Student
+      </a>
+      <a href="/admin/register-faculty">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Register Faculty
+      </a>
+      <a href="/admin/profiles" class="active">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Registered Profiles
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <button onclick="clearUser();window.location='/login'">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Log Out
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <header class="topbar">
+      <span class="topbar-title">Registered Profiles</span>
+      <div class="search-box" style="width:240px;">
+        <span class="search-icon"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+        <input type="text" class="form-input" id="searchInput" placeholder="Search names or IDs..." oninput="render()" />
+      </div>
+    </header>
+    <main class="page-content">
+      <div id="loader" style="text-align:center;padding:4rem;color:var(--text-muted);">
+        <div class="spinner" style="margin:0 auto 1rem auto;"></div> Loading profiles...
+      </div>
+      <div id="profilesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.5rem;display:none;"></div>
+      <p id="noResults" style="display:none;text-align:center;padding:4rem;color:var(--text-muted);">No profiles found.</p>
+    </main>
+  </div>
+</div>
+
+<script src="/static/js/api.js"></script>
+<script src="/static/js/auth.js"></script>
+<script src="/static/js/toast.js"></script>
+<script>
+requireAuth();
+let allProfiles = [];
+
+async function load() {
+  try {
+    const [students, faculty] = await Promise.all([
+      api.get('/api/students/'),
+      api.get('/api/faculty/')
+    ]);
+    allProfiles = [
+      ...students.map(s => ({ ...s, type: 'Student', profile_id: s.student_id })),
+      ...faculty.map(f => ({ ...f, type: 'Faculty', profile_id: f.faculty_id }))
+    ].sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('profilesGrid').style.display = 'grid';
+    render();
+  } catch(e) { showToast('Failed to load profiles', 'error'); }
+}
+
+function render() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = allProfiles.filter(p => 
+    p.name.toLowerCase().includes(q) || 
+    p.profile_id.toLowerCase().includes(q) ||
+    p.email.toLowerCase().includes(q)
+  );
+  
+  const html = filtered.map(p => {
+    let photoHtml = p.photo_base64 
+      ? `<img src="${p.photo_base64}" alt="${p.name}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--border);" />`
+      : `<div style="width:100px;height:100px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:2rem;border:3px solid var(--border);">${p.name[0]}</div>`;
+      
+    const badgeMap = { 'Student': 'badge-purple', 'Faculty': 'badge-blue' };
+    
+    return `<div class="card" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:.75rem;">
+      ${photoHtml}
+      <div style="width:100%;">
+        <h4 style="margin:0;font-size:1.1rem;">${p.name}</h4>
+        <p style="color:var(--text-muted);font-size:.875rem;margin:.25rem 0 .5rem;">${p.profile_id}</p>
+        <span class="badge ${badgeMap[p.type] || 'badge-green'}">${p.type}</span>
+      </div>
+      <div style="background:var(--surface-raised);padding:.5rem;border-radius:.5rem;width:100%;font-size:.85rem;color:var(--text-muted);">
+        ✉ ${p.email}
+      </div>
+    </div>`;
+  }).join('');
+  
+  document.getElementById('profilesGrid').innerHTML = html;
+  
+  if(filtered.length === 0) {
+    document.getElementById('profilesGrid').style.display = 'none';
+    document.getElementById('noResults').style.display = '';
+  } else {
+    document.getElementById('profilesGrid').style.display = 'grid';
+    document.getElementById('noResults').style.display = 'none';
+  }
+}
+
+load();
+</script>
+</body>
+</html>

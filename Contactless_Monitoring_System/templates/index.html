@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartCampus — Contactless Entry System</title>
+  <meta name="description" content="SmartCampus contactless entry system — students enter via facial recognition, visitors pre-register for a digital gate pass." />
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="nav-bar">
+  <div class="container" style="display:flex;align-items:center;justify-content:space-between;height:100%;width:100%;max-width:1280px;margin:0 auto;padding:0 1.5rem;">
+    <a href="/" style="display:flex;align-items:center;gap:.625rem;">
+      <div style="background:var(--primary);border-radius:.5rem;padding:.45rem;display:flex;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <span style="font-weight:800;font-size:1.15rem;letter-spacing:-.02em;">SmartCampus.</span>
+    </a>
+    <div style="display:flex;gap:.75rem;align-items:center;">
+      <a href="/scanner" class="btn btn-outline btn-sm">Gate Terminal</a>
+      <a href="/visit-register" class="btn btn-outline btn-sm">Visitor Booking</a>
+      <a href="/login" class="btn btn-primary btn-sm">Admin Portal</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div style="position:absolute;top:-10rem;right:-10rem;width:30rem;height:30rem;background:#6366f1;border-radius:9999px;filter:blur(120px);opacity:.1;pointer-events:none;"></div>
+  <div style="position:absolute;top:5rem;left:-10rem;width:25rem;height:25rem;background:#a855f7;border-radius:9999px;filter:blur(120px);opacity:.1;pointer-events:none;"></div>
+  <div style="position:relative;">
+    <h1>Welcome to <br><span>SmartCampus.</span></h1>
+    <p>Our institution uses a modern Contactless Entry System to ensure safety, speed, and security at all our gates. Students enter via facial recognition, and Visitors must pre-register to obtain a digital gate pass.</p>
+    <div class="hero-actions">
+      <a href="/visit-register" class="btn btn-primary btn-lg" style="gap:.75rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        Register a Visit
+      </a>
+      <a href="/login" class="btn btn-outline btn-lg" style="gap:.75rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+        Faculty & Admin Login
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section style="padding:5rem 1.5rem;background:#fff;">
+  <div class="container" style="max-width:1280px;margin:0 auto;">
+    <div class="text-center mb-8">
+      <p style="font-size:.75rem;font-weight:700;letter-spacing:.1em;color:var(--primary);text-transform:uppercase;">Seamless Security</p>
+      <h2 style="margin-top:.5rem;font-size:2rem;">How it works for Visitors</h2>
+    </div>
+    <div class="feature-grid" style="padding:0;margin-top:3rem;">
+      <div class="feature-card">
+        <div class="step-num">1</div>
+        <h3 style="margin-top:.75rem;margin-bottom:.5rem;">Book a Visit</h3>
+        <p style="color:var(--text-muted);line-height:1.7;">Fill out the quick pre-registration form before arriving at the campus to request entry from a specific host faculty.</p>
+      </div>
+      <div class="feature-card">
+        <div class="step-num">2</div>
+        <h3 style="margin-top:.75rem;margin-bottom:.5rem;">Get Approved</h3>
+        <p style="color:var(--text-muted);line-height:1.7;">Once the admin approves the visit request, you'll receive a unique 6-digit Visitor ID and a Secure QR code.</p>
+      </div>
+      <div class="feature-card">
+        <div class="step-num">3</div>
+        <h3 style="margin-top:.75rem;margin-bottom:.5rem;">Scan & Enter</h3>
+        <p style="color:var(--text-muted);line-height:1.7;">Present your digital QR pass at the security gate to seamlessly enter the campus without manually signing paper registers.</p>
+      </div>
+    </div>
+  </div>
+</section>
+</body>
+</html>

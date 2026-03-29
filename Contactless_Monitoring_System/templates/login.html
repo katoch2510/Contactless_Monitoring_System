@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login — SmartCampus</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body style="background:var(--surface2);min-height:100vh;display:flex;align-items:center;justify-content:center;">
+
+<div style="width:100%;max-width:420px;padding:1rem;">
+  <div class="card" style="border-top:6px solid var(--primary);padding:2.5rem;">
+    <div class="text-center mb-6">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:3.5rem;height:3.5rem;background:var(--primary-light);border-radius:1rem;margin-bottom:1rem;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="var(--primary)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h2>Admin Portal</h2>
+      <p style="color:var(--text-muted);font-size:.9rem;margin-top:.375rem;">Sign in to manage campus entry</p>
+    </div>
+
+    <form id="authForm" class="space-y-4">
+      <div class="form-group">
+        <label class="form-label" for="email">Email Address</label>
+        <input id="email" type="email" class="form-input" placeholder="admin@campus.edu" required autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input id="password" type="password" class="form-input" placeholder="••••••••" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary w-full" id="submitBtn" style="margin-top:.5rem;padding:.75rem;">
+        Sign In
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:1.25rem;font-size:.8rem;color:var(--text-muted);">
+      <a href="/" style="color:var(--primary);">← Back to Home</a>
+    </p>
+  </div>
+</div>
+
+<script src="/static/js/api.js"></script>
+<script src="/static/js/auth.js"></script>
+<script src="/static/js/toast.js"></script>
+<script>
+  redirectIfLoggedIn('/admin/');
+
+  document.getElementById('authForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner spinner-sm"></div> Authenticating...';
+    
+    const payload = {
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value
+    };
+
+    try {
+      const data = await api.post('/api/auth/login', payload);
+      setUser(data);
+      showToast('Login Successful! Redirecting...', 'success');
+      setTimeout(() => window.location.href = '/admin/', 800);
+    } catch (err) {
+      showToast(err.message || 'Authentication Failed', 'error');
+      btn.disabled = false;
+      btn.innerHTML = 'Sign In';
+    }
+  });
+</script>
+</body>
+</html>
