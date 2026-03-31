@@ -1,13 +1,14 @@
 from flask import Flask, send_from_directory, render_template
 from flask_cors import CORS
 import os
-from db import init_db
-from routes.auth import auth_bp
-from routes.students import students_bp
-from routes.faculty import faculty_bp
-from routes.visitors import visitors_bp
-from routes.dashboard import dashboard_bp
-from routes.qr_routes import qr_bp
+from .db import init_db
+from .routes.auth import auth_bp
+from .routes.students import students_bp
+from .routes.faculty import faculty_bp
+from .routes.visitors import visitors_bp
+from .routes.dashboard import dashboard_bp
+from .routes.qr_routes import qr_bp
+from .routes.institutions import institutions_bp
 
 # Determine template/static folder paths relative to this file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -27,6 +28,7 @@ app.register_blueprint(faculty_bp,      url_prefix='/api/faculty')
 app.register_blueprint(visitors_bp,     url_prefix='/api/visitors')
 app.register_blueprint(dashboard_bp,    url_prefix='/api/dashboard')
 app.register_blueprint(qr_bp,           url_prefix='/api/qr')
+app.register_blueprint(institutions_bp,   url_prefix='/api/institutions')
 
 # Initialize DB on cold start (serverless) and local startup
 try:

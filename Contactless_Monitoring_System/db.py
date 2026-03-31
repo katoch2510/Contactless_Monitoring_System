@@ -19,6 +19,16 @@ if db_dir and not os.path.isdir(db_dir):
     except Exception:
         pass
 
+# If using /tmp, copy the existing DB from the repo if it exists and /tmp/campus.db doesn't
+if DB_PATH == TMP_DB_PATH and not os.path.exists(TMP_DB_PATH):
+    import shutil
+    if os.path.exists(DEFAULT_DB_PATH):
+        try:
+            shutil.copy2(DEFAULT_DB_PATH, TMP_DB_PATH)
+            print(f"Copied existing database to {TMP_DB_PATH}")
+        except Exception as e:
+            print(f"Warning: Failed to copy database to /tmp: {e}")
+
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)

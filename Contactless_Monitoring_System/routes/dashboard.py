@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from db import get_db
-from utils import require_auth, rows_to_list
+from ..db import get_db
+from ..utils import require_auth, rows_to_list
 import datetime
 
 dashboard_bp = Blueprint('dashboard', __name__)

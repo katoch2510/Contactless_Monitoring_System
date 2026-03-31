@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from db import get_db
-from utils import require_auth, rows_to_list, row_to_dict
+from ..db import get_db
+from ..utils import require_auth, rows_to_list, row_to_dict
 import secrets
 import random
 
