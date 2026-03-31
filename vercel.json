@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "Contactless_Monitoring_System/app.py",
+      "src": "api/app.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "Contactless_Monitoring_System/app.py"
+      "dest": "api/app.py"
     }
   ]
 }
