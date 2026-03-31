@@ -28,6 +28,12 @@ app.register_blueprint(visitors_bp,     url_prefix='/api/visitors')
 app.register_blueprint(dashboard_bp,    url_prefix='/api/dashboard')
 app.register_blueprint(qr_bp,           url_prefix='/api/qr')
 
+# Initialize DB on cold start (serverless) and local startup
+try:
+    init_db()
+except Exception as e:
+    print(f"Warning: init_db failed at startup: {e}")
+
 
 # ─── Serve HTML Pages ────────────────────────────────────────────────────────
 

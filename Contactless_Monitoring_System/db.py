@@ -2,7 +2,22 @@ import sqlite3
 import os
 import json
 
-DB_PATH = os.path.join(os.path.dirname(__file__), 'campus.db')
+# Use /tmp on serverless environments where the deployed filesystem is read-only.
+DEFAULT_DB_PATH = os.path.join(os.path.dirname(__file__), 'campus.db')
+TMP_DB_PATH = '/tmp/campus.db'
+
+if os.path.isdir('/tmp') and os.access('/tmp', os.W_OK):
+    DB_PATH = TMP_DB_PATH
+else:
+    DB_PATH = DEFAULT_DB_PATH
+
+# Ensure directory for DB path exists
+db_dir = os.path.dirname(DB_PATH)
+if db_dir and not os.path.isdir(db_dir):
+    try:
+        os.makedirs(db_dir, exist_ok=True)
+    except Exception:
+        pass
 
 
 def get_db():
